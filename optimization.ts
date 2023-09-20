@@ -57,4 +57,16 @@ const simplifyDirectory = (directoryPath: string) => {
         })
     })
 }
-simplifyDirectory('streetClasses');
+// simplifyDirectory('streetClasses');
+const simplifyStreetsMin = () => {
+    const streetsminData = fs.readFileSync("./streetsmin.geo.json", {encoding: 'utf-8'});
+    const streetsmin = JSON.parse(streetsminData) as turf.FeatureCollection;
+    const newStreetsmin = turf.featureCollection([]);
+    streetsmin.features.forEach(val => {
+        newStreetsmin.features.push(
+            simplifyStreet(val as turf.Feature<turf.MultiLineString>)
+        )
+    })
+    fs.writeFileSync("./simpleStreetsMin.geo.json", JSON.stringify(newStreetsmin), {encoding: 'utf-8'});
+}
+simplifyStreetsMin();
