@@ -103,33 +103,23 @@ const detectContinuousStreets = (streets: turf.FeatureCollection<turf.MultiLineS
         length: string,
         shape_len: string
     }>([]);
-    const eliminated: number[] = []
-    streets.features.forEach((street, ind) => {
-        if(eliminated.includes(ind)) return;
-        const newStreet = turf.feature(street.geometry, street.properties);
+    const streetsDone: string[] = [];
+    streets.features.forEach((street, ind, arr) => {
+        // if(street.properties.street_nam !== "95TH") return;
+        const streetID = street.properties.street_nam + " " + street.properties.street_typ
+        if(streetsDone.includes(streetID)) return;
+        // console.log(streetID)
         streets.features.forEach((street2, ind2) => {
             if(!(street2.properties.street_nam == street.properties.street_nam && street2.properties.street_typ == street.properties.street_typ)) return;
-            newStreet.geometry.coordinates.concat(street2.geometry.coordinates);
-            eliminated.push(ind2);
+            arr[ind].geometry.coordinates = arr[ind].geometry.coordinates.concat(street2.geometry.coordinates);
+            // newStreet.geometry.coordinates.concat(street2.geometry.coordinates);
         });
 
-        // streetsCollection.features.forEach((street2, ind2) => {
-        //     if(street.properties.street_nam != street2.properties.street_nam)  return;
-        //     if(street.properties.dir_travel !== street2.properties.dir_travel) return;
-            
-        //     const streetCoords = street.geometry.coordinates;
-        //     const street2Coords = street2.geometry.coordinates;
-        //     const streetStart = streetCoords[0][0];
-        //     const streetEnd = streetCoords[streetCoords.length - 1][streetCoords[streetCoords.length - 1].length - 1];
-        //     const street2Start = street2Coords[0][0];
-        //     const street2End = street2Coords[street2Coords.length - 1][street2Coords[street2Coords.length - 1].length - 1];
-        //     newStreet.geometry.coordinates.concat(street2.geometry.coordinates);
-        //     eliminated.push(ind2);
-        // })
+        const newStreet = turf.feature(arr[ind].geometry, street.properties);
         newStreet.properties.length = turf.length(newStreet).toString();
         newStreet.properties.shape_len = turf.length(newStreet).toString();
-        
         newStreets.features.push(newStreet);
+        streetsDone.push(street.properties.street_nam + " " + street.properties.street_typ);
     });
     console.log(streets.features.length);
     console.log(newStreets.features.length);
