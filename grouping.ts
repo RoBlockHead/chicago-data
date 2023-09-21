@@ -17,7 +17,13 @@ type StreetCollection = {
 }
 
 type GroupedStreets = {
-    [name: string]: StreetCollection
+    [name: string]: turf.FeatureCollection<turf.Geometry, {
+        street_nam?: string,
+        street_typ?: string,
+        tiered?: "Y" | "N",
+        class: number,
+        length: number,
+    }>
 }
 
 const groupedStreets: GroupedStreets = {
