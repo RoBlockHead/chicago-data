@@ -125,15 +125,52 @@ const detectContinuousStreets = (streets: turf.FeatureCollection<turf.MultiLineS
     console.log(newStreets.features.length);
     fs.writeFileSync("./continuousStreets.geo.json", JSON.stringify(newStreets), {encoding: 'utf-8'});
 }
-detectContinuousStreets(locals as turf.FeatureCollection<turf.MultiLineString, {
-    street_nam: string | null,
-    street_typ: string,
-    tiered: "Y" | "N",
-    suf_dir?: string,
-    ewns?: string,
-    dir_travel?: "F" | "T",
-    ewns_coord?: string,
-    class: string,
-    length: string,
-    shape_len: string
-}>);
+// detectContinuousStreets(locals as turf.FeatureCollection<turf.MultiLineString, {
+//     street_nam: string | null,
+//     street_typ: string,
+//     tiered: "Y" | "N",
+//     suf_dir?: string,
+//     ewns?: string,
+//     dir_travel?: "F" | "T",
+//     ewns_coord?: string,
+//     class: string,
+//     length: string,du 0
+//     shape_len: string
+// }>);
+
+const combineLineStrings = (streets: turf.FeatureCollection<turf.MultiLineString>) => {
+    streets.features.forEach((street, ind, arr) => {
+        const newStreet = turf.lineString([]);
+
+        street.geometry.coordinates.forEach((coord, ind2, arr2) => { //returns LineStrings
+            if(ind2 == 0) return;
+            const prevCoord = arr2[ind2-1];
+            if(prevCoord[coord.length-1] == coord[0]) {
+                arr[ind].geometry.coordinates[ind2-1] = prevCoord.concat(coord.slice(1));
+                arr[ind].geometry.coordinates.splice(ind2, 1);
+            }
+        })
+    })
+    return streets;
+}
+
+const findClosestPoint = (point: turf.Position, population: turf.Position[][]) => {
+    let closestPoint: turf.Position = population[0][0];
+    let closestDistance = turf.distance(point, closestPoint);
+    population.forEach((val) => {
+        val.forEach((val2) => {
+            const dist = turf.distance(point, val2);
+            if(dist < closestDistance) {
+                closestDistance = dist;
+                closestPoint = val2;
+            }
+        })
+    })
+    return closestPoint;
+}
+// const contStreets = JSON.parse(fs.readFileSync("./continuousStreets.geo.json", {encoding: 'utf-8'})) as turf.FeatureCollection<turf.MultiLineString>;
+// const combinedStreets = combineLineStrings(contStreets);
+// fs.writeFileSync("./combinedStreets.geo.json", JSON.stringify(combinedStreets), {encoding: 'utf-8'});
+
+
+// define a function that takes an array of pairs of two coordinates in the form [[lon1,lat1],[lon2,lat2]] in random order and returns an array of coordinate pairs in order
